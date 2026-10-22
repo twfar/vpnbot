@@ -14,8 +14,8 @@ from aiogram.utils.formatting import Text, CustomEmoji
 from config import (
     BOT_TOKEN,
     ADMIN_ID,
-    ROLLYPAY_API_KEY,
-    ROLLYPAY_TEST,
+    PAYMENT_API_KEY,
+    PAYMENT_TEST,
     MAIN_MENU_PHOTO,
     TRIAL_MENU_PHOTO,
     PREMIUM_EMOJI_ID,
@@ -1243,11 +1243,11 @@ async def purchase_confirm(callback: CallbackQuery):
             user = await get_user(tg_id)
 
         payment = await payment_provider.create_payment(
-            api_key=ROLLYPAY_API_KEY,
+            api_key=PAYMENT_API_KEY,
             amount=amount,
             tg_id=callback.from_user.id,
             days=days,
-            test=ROLLYPAY_TEST,
+            test=PAYMENT_TEST,
             devices=devices,
             months=months,
         )
@@ -1259,7 +1259,7 @@ async def purchase_confirm(callback: CallbackQuery):
             amount=f"{amount:.2f}",
             currency=PAYMENT_CURRENCY,
             days=days,
-            test=ROLLYPAY_TEST,
+            test=PAYMENT_TEST,
             device_limit=devices,
             months=months,
         )
