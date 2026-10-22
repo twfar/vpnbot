@@ -13,7 +13,7 @@
 | Ссылки | `SUBSCRIPTION_BASE_URL`, `CHANNEL_URL`, `CHANNEL_USERNAME`, `ADMIN_URL`, `SUPPORT_URL`, `PRIVACY_URL`, `OFFER_URL` | подписки, канал, поддержка и документы |
 | 3x-ui | `XUI_HOST`, `XUI_API_TOKEN`, `XUI_INBOUND_IDS` | API панели и inbound для новых клиентов |
 | HWID | `TRIAL_HWID_LIMIT`, `PAID_HWID_LIMIT`, `MIN_PAID_DEVICES`, `MAX_PAID_DEVICES` | ограничения устройств |
-| Trial и срок | `TRIAL_HOURS`, `TRIAL_DURATION_HOURS`, `TRIAL_LIMIT`, `SUBSCRIPTION_DELETE_AFTER_DAYS` | параметры trial и очистки |
+| Trial и срок | `TRIAL_DURATION_HOURS`, `SUBSCRIPTION_DELETE_AFTER_DAYS` | параметры trial и очистки |
 | Тарифы и валюта | `BASE_MONTHLY_PRICE`, `EXTRA_DEVICE_MONTHLY_PRICE`, `CURRENCY_CODE`, `CURRENCY_SYMBOL` | расчет цены |
 | Платежи | `PAYMENT_*` | API-адрес, ключи, подпись, callback, тестовый режим и описание платежа |
 | Медиа | `MAIN_MENU_PHOTO`, `TRIAL_MENU_PHOTO`, `MENU_PHOTOS`, `PREMIUM_EMOJI_ID` | собственные фото и emoji |
@@ -23,13 +23,21 @@
 
 - домен подписок `kitvp.duckdns.org:2096` — заменён на `SUBSCRIPTION_BASE_URL`;
 - Telegram-канал `@kittyvpnoff`, поддержка `@kittyvpn_support_robot` и ссылки Telegra.ph — заменены настройками;
-- команда `/kittyadmin` — заменяется на `/ADMIN_COMMAND`;
+- команда `/kittyadmin` — заменена на `/{ADMIN_COMMAND}`;
 - Telegram ID тестового аккаунта — вынесен в `TEST_USER_TG_ID`, по умолчанию отключён значением `0`;
 - реальные Telegram file_id фотографий меню — удалены из переносимой версии; указываются собственные ID через env;
 - inbound IDs — задаются через `XUI_INBOUND_IDS`, а не используются как фиксированный список;
 - лимиты устройств и тарифная формула — вынесены в настройки;
 - префикс заказа, название сервиса, валюта и адрес API платежей — вынесены в настройки;
 - IP и пути TLS-сертификатов исходного webhook-сервера — удалены, заменены `WEBHOOK_*`.
+
+## Остальные продуктовые правила, которые пока остаются в коде
+
+- группы клиентов 3x-ui называются `trial` и `paid`;
+- для клиентов используется flow `xtls-rprx-vision` и `security=auto`;
+- правила начисления реферальных дней, trial, промокодов, уведомлений и очереди рассылок сохранены из исходного продукта;
+- интерфейс и тексты остаются русскоязычными; название сервиса и внешние ссылки уже настраиваются;
+- параметр `PAYMENT_PROVIDER` описывает выбранную интеграцию, но пока не переключает её автоматически.
 
 ## Что всё ещё требует отдельного этапа
 
