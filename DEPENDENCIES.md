@@ -1,0 +1,66 @@
+# реестр привязок Kitty VPN — исходный снимок 9123a502c2b28ad9b1d1c58202510c3f7f79150c
+
+Исходный снимок взят из приватного репозитория Kitty VPN.  
+Зафиксированный commit: `9123a502c2b28ad9b1d1c58202510c3f7f79150c`  
+Ветка переноса: `universal-template`
+
+## Уже вынесено в настройки
+
+| Категория | Настройки | Где используется |
+|---|---|---|
+| Название сервиса | `SERVICE_NAME` | меню, платежное описание и тексты |
+| Telegram | `BOT_TOKEN`, `ADMIN_ID`, `ADMIN_COMMAND`, `TEST_USER_TG_ID` | запуск, админ-команды и тестовая учётная запись |
+| Ссылки | `SUBSCRIPTION_BASE_URL`, `CHANNEL_URL`, `CHANNEL_USERNAME`, `ADMIN_URL`, `SUPPORT_URL`, `PRIVACY_URL`, `OFFER_URL` | подписки, канал, поддержка и документы |
+| 3x-ui | `XUI_HOST`, `XUI_API_TOKEN`, `XUI_INBOUND_IDS` | API панели и inbound для новых клиентов |
+| HWID | `TRIAL_HWID_LIMIT`, `PAID_HWID_LIMIT`, `MIN_PAID_DEVICES`, `MAX_PAID_DEVICES` | ограничения устройств |
+| Trial | `TRIAL_DURATION_HOURS`, `TRIAL_HWID_LIMIT` | длительность пробного доступа и лимит устройств |
+| Тарифы и валюта | `BASE_MONTHLY_PRICE`, `EXTRA_DEVICE_MONTHLY_PRICE`, `THREE_MONTH_DISCOUNT_PERCENT`, `SUBSCRIPTION_MONTH_DAYS`, `CURRENCY_CODE`, `CURRENCY_SYMBOL` | расчет цены и срока |
+| Платежи | `PAYMENT_*` | API-адрес, ключи, подпись, callback, тестовый режим и описание платежа |
+| Медиа | `MAIN_MENU_PHOTO`, `TRIAL_MENU_PHOTO`, `MENU_PHOTOS`, `PREMIUM_EMOJI_ID` | собственные фото и emoji |
+| База и webhook | `DATABASE_PATH`, `WEBHOOK_*` | локальная БД и запуск webhook |
+
+## Найденные Kitty-зависимости в исходном коде
+
+- домен подписок `kitvp.duckdns.org:2096` — заменён на `SUBSCRIPTION_BASE_URL`;
+- Telegram-канал `@kittyvpnoff`, поддержка `@kittyvpn_support_robot` и ссылки Telegra.ph — заменены настройками;
+- команда `/kittyadmin` — заменена на `/{ADMIN_COMMAND}`;
+- Telegram ID тестового аккаунта — вынесен в `TEST_USER_TG_ID`, по умолчанию отключён значением `0`;
+- реальные Telegram file_id фотографий меню — удалены из переносимой версии; указываются собственные ID через env;
+- inbound IDs — задаются через `XUI_INBOUND_IDS`, а не используются как фиксированный список;
+- лимиты устройств и тарифная формула — вынесены в настройки;
+- префикс заказа, название сервиса, валюта и адрес API платежей — вынесены в настройки;
+- IP и пути TLS-сертификатов исходного webhook-сервера — удалены, заменены `WEBHOOK_*`.
+
+## Остальные продуктовые правила, которые пока остаются в коде
+
+- группы клиентов 3x-ui называются `trial` и `paid`;
+- для клиентов используется flow `xtls-rprx-vision` и `security=auto`;
+- правила начисления реферальных дней, trial, промокодов, уведомлений и очереди рассылок сохранены из исходного продукта;
+- интерфейс и тексты остаются русскоязычными; название сервиса и внешние ссылки уже настраиваются;
+- параметр `PAYMENT_PROVIDER` описывает выбранную интеграцию, но пока не переключает её автоматически.
+
+## Что всё ещё требует отдельного этапа
+
+1. Платёжный код пока реализован адаптером RollyPay. Настройки обобщены, но новый провайдер нельзя подключить одной сменой `PAYMENT_PROVIDER`: потребуется отдельный адаптер и согласование формата webhook.
+2. Тексты пользовательского интерфейса в основном сохранены на русском. Это бизнес-копирайт, а не секрет; полная локализация и редактор текстов — отдельная задача.
+3. Статусы `trial` / `paid`, группы 3x-ui и формат JSON-подписки остаются логикой продукта. Если у друга в панели другие группы или пути подписок, это надо проверить на тестовом клиенте.
+4. В исходном `xui.py` используется `subprocess.run(["curl", ...])`; переход на общий асинхронный `aiohttp.ClientSession` требует отдельного безопасного рефакторинга.
+5. Исходный проект использует SQLite/aiosqlite. Наличие SQLAlchemy в зависимостях не означает, что БД уже переведена на SQLAlchemy.
+
+## Исключено из копии
+
+- `.env` и любые реальные секреты;
+- `bot.db`, `*.db`, `*.sqlite*`;
+- логи, виртуальные окружения, кэш и локальные IDE-файлы;
+- реальные file_id изображений и персональный тестовый Telegram ID;
+- абсолютные пути и TLS-сертификаты исходного сервера.
+
+## additional modularization (branch `universal-template`)
+
+- `services/subscriptions.py`: paid renewal orchestration, currently used by `webhook.py`; it deliberately delegates persistence and 3x-ui calls to the existing adapters.
+- `subscription_urls.py`: pure URL builder covered by unit tests. Regular and JSON links share `SUBSCRIPTION_BASE_URL` and use configurable paths.
+- `payments/base.py`: shared payment and webhook contracts.
+- `payments/rollypay.py`: current provider adapter for checkout creation, HMAC signature verification and event normalization.
+- `payments/factory.py`: provider selection. Only `rollypay` is implemented until the replacement provider is selected.
+- `db.py`: an atomic `claim_payment_for_processing` prevents concurrent duplicate paid webhooks from applying a second renewal. The database is still SQLite/aiosqlite; SQLAlchemy migration is not part of this stage.
+- `.env.test.example`: isolated configuration template. It contains placeholders and cannot be used until test credentials and a dedicated test 3x-ui panel are supplied.
