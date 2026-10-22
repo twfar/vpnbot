@@ -88,8 +88,8 @@ async def webhook(request):
     )
 
     if status != "paid":
-        await update_payment_status_if_unclaimed(payment_id, status)
-        if status in ("canceled", "expired"):
+        status_updated = await update_payment_status_if_unclaimed(payment_id, status)
+        if status_updated and status in ("canceled", "expired"):
             try:
                 await request.app["bot"].send_message(payment["tg_id"], "❌ оплата не прошла.\n\nплатёж отменён или истёк. если деньги списались, но подписка не продлилась — напиши в поддержку.")
             except Exception:
