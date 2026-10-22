@@ -1,12 +1,12 @@
 import uuid
 import aiohttp
 
-from config import PAYMENT_API_BASE_URL, PAYMENT_CURRENCY, PAYMENT_ORDER_PREFIX, SERVICE_NAME
+from config import PAYMENT_API_BASE_URL, PAYMENT_CURRENCY, PAYMENT_ORDER_PREFIX, SERVICE_NAME, MIN_PAID_DEVICES
 
 BASE_URL = PAYMENT_API_BASE_URL
 
 
-async def create_payment(api_key, amount, tg_id, days, test, devices=3, months=1):
+async def create_payment(api_key, amount, tg_id, days, test, devices=MIN_PAID_DEVICES, months=1):
     order_id = f"{PAYMENT_ORDER_PREFIX}_{tg_id}_{uuid.uuid4().hex[:12]}"
     payload = {
         "amount": f"{amount:.2f}",
