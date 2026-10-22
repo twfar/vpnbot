@@ -42,6 +42,8 @@ class Settings(BaseSettings):
     max_paid_devices: int = 10
     base_monthly_price: int = 80
     extra_device_monthly_price: int = 30
+    three_month_discount_percent: int = 10
+    subscription_month_days: int = 30
     currency_code: str = "RUB"
     currency_symbol: str = "₽"
 
@@ -117,6 +119,8 @@ MIN_PAID_DEVICES = settings.min_paid_devices
 MAX_PAID_DEVICES = settings.max_paid_devices
 BASE_MONTHLY_PRICE = settings.base_monthly_price
 EXTRA_DEVICE_MONTHLY_PRICE = settings.extra_device_monthly_price
+THREE_MONTH_DISCOUNT_PERCENT = settings.three_month_discount_percent
+SUBSCRIPTION_MONTH_DAYS = settings.subscription_month_days
 PAYMENT_CURRENCY = settings.currency_code
 CURRENCY_SYMBOL = settings.currency_symbol
 PAYMENT_PROVIDER = settings.payment_provider
