@@ -53,8 +53,6 @@ class Settings(BaseSettings):
     payment_callback_url: str = ""
     payment_webhook_path: str = "/payment/webhook"
     payment_test: bool = True
-    payment_default_price: int = 80
-    payment_default_days: int = 30
     payment_order_prefix: str = "vpn"
 
     channel_url: str = ""
@@ -128,8 +126,6 @@ PAYMENT_SIGNING_SECRET = settings.payment_signing_secret
 PAYMENT_CALLBACK_URL = settings.payment_callback_url
 PAYMENT_WEBHOOK_PATH = settings.payment_webhook_path
 PAYMENT_TEST = settings.payment_test
-PAYMENT_DEFAULT_PRICE = settings.payment_default_price
-PAYMENT_DEFAULT_DAYS = settings.payment_default_days
 PAYMENT_ORDER_PREFIX = settings.payment_order_prefix
 CHANNEL_URL = settings.channel_url
 CHANNEL_USERNAME = settings.channel_username or settings.channel_url
@@ -152,8 +148,6 @@ ROLLYPAY_API_KEY = PAYMENT_API_KEY
 ROLLYPAY_SIGNING_SECRET = PAYMENT_SIGNING_SECRET
 ROLLYPAY_CALLBACK_URL = PAYMENT_CALLBACK_URL
 ROLLYPAY_TEST = PAYMENT_TEST
-ROLLYPAY_DEFAULT_PRICE = PAYMENT_DEFAULT_PRICE
-ROLLYPAY_DEFAULT_DAYS = PAYMENT_DEFAULT_DAYS
 
 if not BOT_TOKEN:
     raise RuntimeError("BOT_TOKEN is not set")
