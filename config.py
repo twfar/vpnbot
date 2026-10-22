@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     test_user_tg_id: int = 0
 
     subscription_base_url: str = "https://example.com:2096"
+    xui_subscription_path: str = "/s/"
+    xui_json_subscription_path: str = "/jsnn/"
 
     xui_host: str = "https://127.0.0.1:2053"
     xui_api_token: str = ""
@@ -105,6 +107,8 @@ TEST_USER_TG_ID = settings.test_user_tg_id
 
 SERVICE_NAME = settings.service_name
 SUBSCRIPTION_BASE_URL = settings.subscription_base_url.rstrip("/")
+XUI_SUBSCRIPTION_PATH = "/" + settings.xui_subscription_path.strip("/") + "/"
+XUI_JSON_SUBSCRIPTION_PATH = "/" + settings.xui_json_subscription_path.strip("/") + "/"
 XUI_HOST = settings.xui_host.rstrip("/")
 XUI_API_TOKEN = settings.xui_api_token
 XUI_INBOUND_IDS = settings.parsed_inbound_ids
