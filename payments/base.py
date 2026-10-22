@@ -1,7 +1,8 @@
 """Provider-neutral payment contracts."""
 from __future__ import annotations
 
-from typing import Protocol, TypedDict
+from dataclasses import dataclass
+from typing import Mapping, Protocol, TypedDict
 
 
 class PaymentResult(TypedDict):
@@ -28,3 +29,26 @@ class PaymentProvider(Protocol):
     ) -> PaymentResult:
         """Create a payment and return normalized checkout details."""
         ...
+
+    def verify_webhook(
+        self, raw_body: bytes, headers: Mapping[str, str]
+    ) -> bool:
+        """Verify the provider-specific webhook signature."""
+        ...
+
+    def parse_webhook(self, raw_body: bytes) -> PaymentWebhookEvent:
+        """Normalize a provider-specific webhook payload."""
+        ...
+
+@dataclass(frozen=True, slots=True)
+class PaymentWebhookEvent:
+    """Provider-neutral representation of a verified payment webhook."""
+
+    payment_id: str
+    status: str
+    amount: str
+    currency: str
+    test: bool | None
+    event_type: str
+
+
