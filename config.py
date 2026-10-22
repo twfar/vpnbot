@@ -36,7 +36,6 @@ class Settings(BaseSettings):
     paid_hwid_limit: int = 3
 
     trial_duration_hours: int = 24
-    subscription_delete_after_days: int = 3
 
     min_paid_devices: int = 3
     max_paid_devices: int = 10
@@ -114,7 +113,6 @@ XUI_INBOUND_IDS = settings.parsed_inbound_ids
 TRIAL_DURATION_HOURS = settings.trial_duration_hours
 TRIAL_HWID_LIMIT = settings.trial_hwid_limit
 PAID_HWID_LIMIT = settings.paid_hwid_limit
-SUBSCRIPTION_DELETE_AFTER_DAYS = settings.subscription_delete_after_days
 MIN_PAID_DEVICES = settings.min_paid_devices
 MAX_PAID_DEVICES = settings.max_paid_devices
 BASE_MONTHLY_PRICE = settings.base_monthly_price
