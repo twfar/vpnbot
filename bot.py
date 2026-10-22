@@ -60,7 +60,7 @@ from db import (
     get_broadcast_users,
     get_user_by_username,
 )
-from rollypay import create_payment as rollypay_create_payment
+from payments import get_payment_provider
 
 from xui import (
     create_client,
@@ -77,6 +77,8 @@ from xui import (
     set_inbound_ids,
     get_subscription_url,
 )
+
+payment_provider = get_payment_provider()
 
 dp = Dispatcher()
 
@@ -1240,7 +1242,7 @@ async def purchase_confirm(callback: CallbackQuery):
                 )
             user = await get_user(tg_id)
 
-        payment = await rollypay_create_payment(
+        payment = await payment_provider.create_payment(
             api_key=ROLLYPAY_API_KEY,
             amount=amount,
             tg_id=callback.from_user.id,
@@ -1262,7 +1264,7 @@ async def purchase_confirm(callback: CallbackQuery):
             months=months,
         )
     except Exception:
-        logging.exception("failed to create rollypay payment")
+        logging.exception("failed to create payment")
         await edit_menu(callback.message, 
             "❌ не удалось создать платёж.\n\n"
             "попробуй ещё раз или напиши в поддержку.",
