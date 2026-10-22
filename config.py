@@ -35,9 +35,7 @@ class Settings(BaseSettings):
     trial_hwid_limit: int = 1
     paid_hwid_limit: int = 3
 
-    trial_hours: int = 12
     trial_duration_hours: int = 24
-    trial_limit: int = 4
     subscription_delete_after_days: int = 3
 
     min_paid_devices: int = 3
@@ -111,9 +109,7 @@ SUBSCRIPTION_BASE_URL = settings.subscription_base_url.rstrip("/")
 XUI_HOST = settings.xui_host.rstrip("/")
 XUI_API_TOKEN = settings.xui_api_token
 XUI_INBOUND_IDS = settings.parsed_inbound_ids
-TRIAL_HOURS = settings.trial_hours
 TRIAL_DURATION_HOURS = settings.trial_duration_hours
-TRIAL_LIMIT = settings.trial_limit
 TRIAL_HWID_LIMIT = settings.trial_hwid_limit
 PAID_HWID_LIMIT = settings.paid_hwid_limit
 SUBSCRIPTION_DELETE_AFTER_DAYS = settings.subscription_delete_after_days
