@@ -5,6 +5,7 @@ import time
 from urllib.parse import quote
 
 from config import (XUI_HOST, XUI_API_TOKEN, SUBSCRIPTION_BASE_URL, XUI_SUBSCRIPTION_PATH, XUI_JSON_SUBSCRIPTION_PATH, XUI_INBOUND_IDS, TRIAL_HWID_LIMIT, PAID_HWID_LIMIT, TRIAL_DURATION_HOURS)
+from subscription_urls import build_subscription_url
 
 DEFAULT_INBOUND_IDS = XUI_INBOUND_IDS.copy()
 INBOUND_IDS = DEFAULT_INBOUND_IDS.copy()
@@ -124,7 +125,7 @@ def get_subscription_url(sub_id, json_mode=False):
 
     path = XUI_JSON_SUBSCRIPTION_PATH if json_mode else XUI_SUBSCRIPTION_PATH
 
-    return f"{SUBSCRIPTION_BASE_URL}{path}{quote(str(sub_id), safe='')}"
+    return build_subscription_url(SUBSCRIPTION_BASE_URL, str(sub_id), path)
 
 def find_client(email):
     inbounds = get_inbounds()
