@@ -916,7 +916,7 @@ async def subscription(callback: CallbackQuery):
         await callback.answer()
         await edit_menu(
             callback.message,
-            "привет это kitty vpn!\n\n"
+            f"привет это {SERVICE_NAME}!\n\n"
             "мы имеем:\n"
             "крутые фото котиков\n"
             "интернет без блокировок\n"
@@ -1013,7 +1013,7 @@ async def back_to_menu(callback: CallbackQuery):
         return
 
     await callback.answer()
-    menu_text = "главное меню kitty vpn\n\nнаш канал — @kittyvpnoff"
+    menu_text = f"главное меню {SERVICE_NAME}\n\nнаш канал — {CHANNEL}"
     if callback.from_user.id == ADMIN_ID:
         menu_text += "\n\n" + await server_expenses_summary()
     await edit_menu(
@@ -1220,7 +1220,7 @@ async def purchase_confirm(callback: CallbackQuery):
             sub_id = client_data.get("subId") or client.get("sub_id")
             if not sub_id:
                 raise RuntimeError("new payment client has no subscription id")
-            subscription_url = f"https://kitvp.duckdns.org:2096/jsnn/{sub_id}"
+            subscription_url = get_subscription_url(sub_id, json_mode=True)
             expires_at = int(
                 client_data.get("expiryTime") or client.get("expiry_time") or 0
             ) // 1000
