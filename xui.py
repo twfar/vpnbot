@@ -122,9 +122,9 @@ def get_subscription_url(sub_id, json_mode=False):
     if not sub_id:
         raise ValueError("sub_id is empty")
 
-    path = "/jsnn/" if json_mode else "/s/"
+    path = XUI_JSON_SUBSCRIPTION_PATH if json_mode else XUI_SUBSCRIPTION_PATH
 
-    return f"{SUBSCRIPTION_BASE_URL}{path}{sub_id}"
+    return f"{SUBSCRIPTION_BASE_URL}{path}{quote(str(sub_id), safe='')}"
 
 def find_client(email):
     inbounds = get_inbounds()
