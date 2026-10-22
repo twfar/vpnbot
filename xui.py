@@ -4,7 +4,7 @@ import time
 
 from urllib.parse import quote
 
-from config import XUI_HOST, XUI_API_TOKEN, SUBSCRIPTION_BASE_URL, XUI_INBOUND_IDS, TRIAL_HWID_LIMIT, PAID_HWID_LIMIT
+from config import XUI_HOST, XUI_API_TOKEN, SUBSCRIPTION_BASE_URL, XUI_INBOUND_IDS, TRIAL_HWID_LIMIT, PAID_HWID_LIMIT, TRIAL_DURATION_HOURS
 
 DEFAULT_INBOUND_IDS = XUI_INBOUND_IDS.copy()
 INBOUND_IDS = DEFAULT_INBOUND_IDS.copy()
@@ -155,7 +155,7 @@ def find_client_by_sub_id(sub_id):
 def create_client(
     tg_id,
     email,
-    expiry_hours=12,
+    expiry_hours=TRIAL_DURATION_HOURS,
     total_gb=0,
     group="trial",
 ):
