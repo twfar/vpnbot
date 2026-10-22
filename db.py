@@ -548,6 +548,20 @@ async def payment_paid_once(payment_id):
         await db.commit()
         return cursor.rowcount == 1
 
+async def claim_payment_for_processing(payment_id):
+    """Atomically claim a paid webhook so concurrent deliveries cannot renew twice."""
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        cursor = await db.execute(
+            """
+            UPDATE payments
+            SET status = 'processing', updated_at = strftime('%s', 'now')
+            WHERE payment_id = ? AND status NOT IN ('paid', 'processing')
+            """,
+            (payment_id,),
+        )
+        await db.commit()
+        return cursor.rowcount == 1
+
 
 async def delete_user_data(tg_id: int):
     async with aiosqlite.connect(DATABASE_PATH) as db:
