@@ -18,7 +18,8 @@ from db import (
     get_pending_referral_rewards,
     mark_referral_rewards_applied,
 )
-from xui import create_client, renew_client_by_sub_id, add_days_to_client_by_sub_id, get_subscription_url
+from xui import add_days_to_client_by_sub_id, get_subscription_url
+from services.subscriptions import renew_paid_subscription
 
 
 def verify_signature(raw_body, timestamp, signature, secret):
@@ -128,35 +129,8 @@ async def webhook(request):
         return web.Response(status=200, text="user not found")
 
     try:
-        sub_id = user["sub_id"]
-        if not sub_id:
-            # The expired client may have been deleted from 3x-ui.
-            # Recreate it first, then apply the paid period exactly once.
-            recreated = create_client(
-                tg_id=int(user["tg_id"]),
-                email=user["email"] or f"tg_{user['tg_id']}",
-                expiry_hours=0,
-                group="paid",
-            )
-            sub_id = recreated["sub_id"]
-
-        updated = renew_client_by_sub_id(
-            sub_id,
-            int(payment["days"]),
-            device_limit=int(payment["device_limit"]),
-        )
-        expires_at = int(updated.get("expiryTime", 0)) // 1000
-
-        await update_user(
-            tg_id=user["tg_id"],
-            username=user["username"],
-            email=user["email"],
-            sub_id=sub_id,
-            subscription_url=get_subscription_url(sub_id, json_mode=True),
-            status="paid",
-            created_at=user["created_at"],
-            expires_at=expires_at,
-        )
+        renewal = await renew_paid_subscription(user, payment)
+        sub_id = renewal.sub_id
     except Exception:
         logging.exception("failed to renew after payment")
         await update_payment_status(payment_id, "renewal_failed")
