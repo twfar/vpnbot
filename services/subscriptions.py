@@ -7,7 +7,7 @@ still the existing adapters and can be replaced independently later.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping, Any
+from typing import Mapping
 
 from db import update_user
 from xui import create_client, get_subscription_url, renew_client_by_sub_id
@@ -22,7 +22,7 @@ class RenewalResult:
 
 
 async def renew_paid_subscription(
-    user: Mapping[str, Any],
+    user: Mapping[str, object],
     payment: Mapping[str, Any],
 ) -> RenewalResult:
     """Apply one paid period and synchronize the local user record.
