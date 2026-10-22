@@ -5,7 +5,7 @@ from aiohttp import web
 from aiogram import Bot
 
 from config import (BOT_TOKEN, ADMIN_ID, PAYMENT_SIGNING_SECRET, PAYMENT_WEBHOOK_PATH, WEBHOOK_HOST, WEBHOOK_PORT, WEBHOOK_SSL_CERT_PATH, WEBHOOK_SSL_KEY_PATH)
-from payments import get_payment_provider
+from payments.factory import get_payment_provider
 from db import (
     get_payment,
     update_payment_status,
