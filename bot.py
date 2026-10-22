@@ -16,8 +16,6 @@ from config import (
     ADMIN_ID,
     ROLLYPAY_API_KEY,
     ROLLYPAY_TEST,
-    ROLLYPAY_DEFAULT_PRICE,
-    ROLLYPAY_DEFAULT_DAYS,
     MAIN_MENU_PHOTO,
     TRIAL_MENU_PHOTO,
     PREMIUM_EMOJI_ID,
@@ -109,7 +107,7 @@ def menu_caption(text: str):
 
 async def answer_menu(message: Message, text: str, reply_markup=None, photo: str = ""):
     kwargs = menu_caption(text)
-    photo = random_menu_photo()
+    photo = photo or random_menu_photo()
     if not photo:
         await message.answer(text, reply_markup=reply_markup)
         return
