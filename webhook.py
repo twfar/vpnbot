@@ -116,10 +116,11 @@ async def webhook(request):
         expires_at = renewal.expires_at
     except Exception:
         logging.exception("failed to renew after payment")
-        await update_payment_status(payment_id, "renewal_failed")
+        await update_payment_status(payment_id, "renewal_review")
         await notify_admin(
             request.app["bot"],
-            "❌ оплата получена, но продление не удалось\n\n"
+            "❌ оплата получена, но результат продления не подтверждён\n\n"
+            "нужна ручная проверка панели перед повторной обработкой.\n"
             f"💳 payment id: {payment_id}\n"
             f"🔗 sub id: {user['sub_id'] or 'не создан'}",
         )
