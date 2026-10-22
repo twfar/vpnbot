@@ -14,7 +14,6 @@ from aiogram.utils.formatting import Text, CustomEmoji
 from config import (
     BOT_TOKEN,
     ADMIN_ID,
-    TRIAL_HOURS,
     ROLLYPAY_API_KEY,
     ROLLYPAY_TEST,
     ROLLYPAY_DEFAULT_PRICE,
@@ -759,7 +758,7 @@ async def get_id(message: Message):
 
 
 @dp.message(Command(ADMIN_COMMAND))
-async def kitty_admin(message: Message):
+async def admin_command_handler(message: Message):
     if message.from_user.id != ADMIN_ID:
         username = f"@{message.from_user.username}" if message.from_user.username else "—"
         await message.bot.send_message(
