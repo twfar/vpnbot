@@ -25,6 +25,7 @@ from config import (
     TRIAL_DURATION_HOURS, SUBSCRIPTION_DELETE_AFTER_DAYS,
     MIN_PAID_DEVICES, MAX_PAID_DEVICES,
     BASE_MONTHLY_PRICE, EXTRA_DEVICE_MONTHLY_PRICE,
+    THREE_MONTH_DISCOUNT_PERCENT, SUBSCRIPTION_MONTH_DAYS,
     CURRENCY_SYMBOL, PAYMENT_CURRENCY,
     ADMIN_URL, SUPPORT_URL, CHANNEL_URL, CHANNEL_USERNAME, PRIVACY_URL, OFFER_URL,
     MENU_PHOTOS,
@@ -81,7 +82,7 @@ from xui import (
 
 dp = Dispatcher()
 
-BOT_VERSION = "1.0.8"
+BOT_VERSION = "1.0.0"
 CHANNEL = CHANNEL_USERNAME or CHANNEL_URL
 
 admin_action_waiting = {}
@@ -99,7 +100,7 @@ def random_menu_photo():
 def menu_caption(text: str):
     if PREMIUM_EMOJI_ID:
         return Text(
-            CustomEmoji("🐈", custom_emoji_id=PREMIUM_EMOJI_ID),
+            CustomEmoji("🔐", custom_emoji_id=PREMIUM_EMOJI_ID),
             " ",
             text,
         ).as_kwargs()
@@ -731,14 +732,10 @@ async def start(message: Message):
 
     await answer_menu(
         message,
-        f"привет это {SERVICE_NAME}!\n\n"
-        "мы имеем:\n"
-        "крутые фото котиков\n"
-        "интернет без блокировок\n"
-        "низкую цену\n\n"
-        "предлагаю выбор:\n"
-        "ты подписываешься на наш канал и мы даем тебе бесплатно 1 день\n"
-        "ты просто покупаешь доступ к нашему впн",
+        f"добро пожаловать в {SERVICE_NAME}!\n\n"
+        "управляй VPN-подпиской прямо в Telegram.\n"
+        "можно начать с пробного доступа или сразу выбрать тариф.\n\n"
+        f"канал сервиса: {CHANNEL}",
         reply_markup=welcome_keyboard(),
         photo=TRIAL_MENU_PHOTO,
     )
@@ -842,7 +839,7 @@ async def grant_trial(callback: CallbackQuery):
     trial_page_url = get_subscription_url(client["sub_id"])
     await edit_menu(
         callback.message,
-        "🎁 trial активирован на 24 часа!\n\n"
+        f"🎁 trial активирован на {TRIAL_DURATION_HOURS} ч.!\n\n"
         "нажми «подключиться», чтобы открыть страницу подписки.",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(
@@ -1060,10 +1057,10 @@ async def purchase(callback: CallbackQuery):
     await callback.answer()
     await edit_menu(callback.message, 
         "💳 покупка подписки\n\n"
-        "📱 количество устройств: 3\n"
+        f"📱 количество устройств: {MIN_PAID_DEVICES}\n"
         "📅 срок: 1 месяц\n\n"
         "выбери параметры:",
-        reply_markup=purchase_selection_keyboard(3),
+        reply_markup=purchase_selection_keyboard(MIN_PAID_DEVICES),
     )
 
 
@@ -1077,9 +1074,9 @@ def purchase_selection_keyboard(devices: int):
     monthly_price = calculate_monthly_price(devices)
     return InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="🚫" if devices == MIN_PAID_DEVICES else "−", callback_data="purchase_device_value" if devices == 3 else "purchase_device_minus"),
+            InlineKeyboardButton(text="🚫" if devices == MIN_PAID_DEVICES else "−", callback_data="purchase_device_value" if devices == MIN_PAID_DEVICES else "purchase_device_minus"),
             InlineKeyboardButton(text=str(devices), callback_data="purchase_device_value"),
-            InlineKeyboardButton(text="🚫" if devices == MAX_PAID_DEVICES else "+", callback_data="purchase_device_value" if devices == 10 else "purchase_device_plus"),
+            InlineKeyboardButton(text="🚫" if devices == MAX_PAID_DEVICES else "+", callback_data="purchase_device_value" if devices == MAX_PAID_DEVICES else "purchase_device_plus"),
         ],
         [InlineKeyboardButton(text=f"✅ далее · {monthly_price} {CURRENCY_SYMBOL}/мес", callback_data="purchase_to_months", style=ButtonStyle.SUCCESS)],
         [InlineKeyboardButton(text="🔙 назад", callback_data="back_to_subscription")],
@@ -1091,7 +1088,7 @@ def purchase_months_keyboard(devices: int, months: int):
     return InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="1 месяц", callback_data="purchase_months_1"),
-            InlineKeyboardButton(text="3 месяца · −10%", callback_data="purchase_months_3"),
+            InlineKeyboardButton(text=f"3 месяца · −{THREE_MONTH_DISCOUNT_PERCENT}%", callback_data="purchase_months_3"),
         ],
         [InlineKeyboardButton(text=f"✅ подтвердить · {format_price(total)} {CURRENCY_SYMBOL}", callback_data="purchase_confirm", style=ButtonStyle.PRIMARY)],
         [InlineKeyboardButton(text="🔙 назад", callback_data="purchase_back_devices")],
@@ -1116,7 +1113,7 @@ async def update_purchase_selection(callback: CallbackQuery, devices: int, month
         f"📱 устройств: {devices}\n"
         f"📅 срок: {months} {'месяц' if months == 1 else 'месяца'}\n"
         f"💰 цена: {format_price(total)} {CURRENCY_SYMBOL}\n"
-        + ("🏷 скидка 10% за 3 месяца уже учтена.\n\n" if months == 3 else "\n")
+        + (f"🏷 скидка {THREE_MONTH_DISCOUNT_PERCENT}% за 3 месяца уже учтена.\n\n" if months == 3 else "\n")
         + "выбери срок:",
         reply_markup=purchase_months_keyboard(devices, months),
     )
@@ -1126,31 +1123,31 @@ async def update_purchase_selection(callback: CallbackQuery, devices: int, month
 async def purchase_device_minus(callback: CallbackQuery):
     current = purchase_selection.get(callback.from_user.id, {"devices": MIN_PAID_DEVICES, "months": 0})
     await callback.answer()
-    await update_purchase_selection(callback, max(3, current["devices"] - 1), 0)
+    await update_purchase_selection(callback, max(MIN_PAID_DEVICES, current["devices"] - 1), 0)
 
 
 @dp.callback_query(lambda c: c.data == "purchase_device_plus")
 async def purchase_device_plus(callback: CallbackQuery):
-    current = purchase_selection.get(callback.from_user.id, {"devices": 3, "months": 0})
+    current = purchase_selection.get(callback.from_user.id, {"devices": MIN_PAID_DEVICES, "months": 0})
     await callback.answer()
-    await update_purchase_selection(callback, min(10, current["devices"] + 1), 0)
+    await update_purchase_selection(callback, min(MAX_PAID_DEVICES, current["devices"] + 1), 0)
 
 
 @dp.callback_query(lambda c: c.data == "purchase_device_value")
 async def purchase_device_value(callback: CallbackQuery):
-    await callback.answer("доступно от 3 до 10 устройств", show_alert=True)
+    await callback.answer(f"доступно от {MIN_PAID_DEVICES} до {MAX_PAID_DEVICES} устройств", show_alert=True)
 
 
 @dp.callback_query(lambda c: c.data == "purchase_to_months")
 async def purchase_to_months(callback: CallbackQuery):
-    current = purchase_selection.get(callback.from_user.id, {"devices": 3, "months": 0})
+    current = purchase_selection.get(callback.from_user.id, {"devices": MIN_PAID_DEVICES, "months": 0})
     await callback.answer()
     await update_purchase_selection(callback, current["devices"], 1)
 
 
 @dp.callback_query(lambda c: c.data.startswith("purchase_months_"))
 async def purchase_months(callback: CallbackQuery):
-    current = purchase_selection.get(callback.from_user.id, {"devices": 3, "months": 0})
+    current = purchase_selection.get(callback.from_user.id, {"devices": MIN_PAID_DEVICES, "months": 0})
     months = int(callback.data.rsplit("_", 1)[1])
     await callback.answer()
     await update_purchase_selection(callback, current["devices"], months)
@@ -1158,7 +1155,7 @@ async def purchase_months(callback: CallbackQuery):
 
 @dp.callback_query(lambda c: c.data == "purchase_back_devices")
 async def purchase_back_devices(callback: CallbackQuery):
-    current = purchase_selection.get(callback.from_user.id, {"devices": 3, "months": 0})
+    current = purchase_selection.get(callback.from_user.id, {"devices": MIN_PAID_DEVICES, "months": 0})
     await callback.answer()
     await update_purchase_selection(callback, current["devices"], 0)
 
@@ -1168,7 +1165,7 @@ def purchase_price(devices: int, months: int) -> float:
     if months == 1:
         return float(monthly_price)
     if months == 3:
-        return monthly_price * 3 * 0.9
+        return monthly_price * 3 * (100 - THREE_MONTH_DISCOUNT_PERCENT) / 100
     raise ValueError("unsupported subscription period")
 
 
@@ -1193,7 +1190,7 @@ async def purchase_confirm(callback: CallbackQuery):
         return
 
     amount = purchase_price(devices, months)
-    days = months * 30
+    days = months * SUBSCRIPTION_MONTH_DAYS
     user = await get_user(callback.from_user.id)
 
     await callback.answer("создаю платёж...")
@@ -1983,7 +1980,7 @@ async def admin_inbound_ids(callback: CallbackQuery):
         "🌐 inbound IDs для новых клиентов\n\n"
         f"сейчас подключаются inbound: {', '.join(map(str, current_ids))}\n\n"
         "отправь новые ID через запятую или пробел.\n"
-        "пример: 8, 31, 35, 41, 54\n\n"
+        "пример: 1, 2, 3\n\n"
         "изменение повлияет только на новых клиентов. существующие подписки не изменятся.",
         reply_markup=InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="🔙 назад", callback_data="admin_back")]
