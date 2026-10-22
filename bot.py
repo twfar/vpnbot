@@ -912,14 +912,10 @@ async def subscription(callback: CallbackQuery):
         await callback.answer()
         await edit_menu(
             callback.message,
-            f"привет это {SERVICE_NAME}!\n\n"
-            "мы имеем:\n"
-            "крутые фото котиков\n"
-            "интернет без блокировок\n"
-            "низкую цену\n\n"
-            "предлагаю выбор:\n"
-            "ты подписываешься на наш канал и мы даем тебе бесплатно 1 день\n"
-            "ты просто покупаешь доступ к нашему впн",
+            f"добро пожаловать в {SERVICE_NAME}!\n\n"
+            "управляй VPN-подпиской прямо в Telegram.\n"
+            "можно начать с пробного доступа или сразу выбрать тариф.\n\n"
+            f"канал сервиса: {CHANNEL}",
             reply_markup=welcome_keyboard(),
         )
         return
@@ -1050,7 +1046,7 @@ async def purchase(callback: CallbackQuery):
     user = await get_user(callback.from_user.id)
 
     purchase_selection[callback.from_user.id] = {
-        "devices": 3,
+        "devices": MIN_PAID_DEVICES,
         "months": 1,
     }
 
@@ -2379,7 +2375,7 @@ async def admin_message_handler(message: Message):
         except ValueError as error:
             await message.answer(
                 f"❌ некорректный список: {error}\n\n"
-                "пример: 8, 31, 35, 41, 54"
+                "пример: 1, 2, 3"
             )
             return
 
