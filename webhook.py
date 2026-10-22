@@ -1,13 +1,11 @@
-import hashlib
-import hmac
-import json
 import logging
 import ssl
 
 from aiohttp import web
 from aiogram import Bot
 
-from config import (BOT_TOKEN, ADMIN_ID, ROLLYPAY_SIGNING_SECRET, PAYMENT_WEBHOOK_PATH, WEBHOOK_HOST, WEBHOOK_PORT, WEBHOOK_SSL_CERT_PATH, WEBHOOK_SSL_KEY_PATH)
+from config import (BOT_TOKEN, ADMIN_ID, PAYMENT_SIGNING_SECRET, PAYMENT_WEBHOOK_PATH, WEBHOOK_HOST, WEBHOOK_PORT, WEBHOOK_SSL_CERT_PATH, WEBHOOK_SSL_KEY_PATH)
+from payments import get_payment_provider
 from db import (
     get_payment,
     update_payment_status,
@@ -23,17 +21,7 @@ from xui import add_days_to_client_by_sub_id, get_subscription_url
 from services.subscriptions import renew_paid_subscription
 
 
-def verify_signature(raw_body, timestamp, signature, secret):
-    if not timestamp or not signature or not secret:
-        return False
-
-    expected = hmac.new(
-        secret.encode(),
-        timestamp.encode() + b"." + raw_body,
-        hashlib.sha256,
-    ).hexdigest()
-
-    return hmac.compare_digest(expected, signature)
+payment_provider = get_payment_provider()
 
 
 async def notify_admin(bot, text):
@@ -46,24 +34,16 @@ async def notify_admin(bot, text):
 async def webhook(request):
     raw_body = await request.read()
 
-    if not verify_signature(
-        raw_body,
-        request.headers.get("X-Timestamp", ""),
-        request.headers.get("X-Signature", ""),
-        ROLLYPAY_SIGNING_SECRET,
-    ):
+    if not payment_provider.verify_webhook(raw_body, request.headers):
         return web.Response(status=403, text="invalid signature")
 
     try:
-        event = json.loads(raw_body)
-    except json.JSONDecodeError:
-        return web.Response(status=400, text="invalid json")
+        event = payment_provider.parse_webhook(raw_body)
+    except ValueError as exc:
+        return web.Response(status=400, text=str(exc))
 
-    payment_id = event.get("payment_id")
-    status = event.get("status")
-
-    if not payment_id or not status:
-        return web.Response(status=400, text="missing payment fields")
+    payment_id = event.payment_id
+    status = event.status
 
     payment = await get_payment(payment_id)
 
@@ -74,7 +54,7 @@ async def webhook(request):
         )
         return web.Response(status=200, text="ignored")
 
-    if "test" in event and bool(event.get("test")) != bool(payment["test"]):
+    if event.test is not None and event.test != bool(payment["test"]):
         await notify_admin(
             request.app["bot"],
             f"⚠️ несовпадение test-режима\n\n🆔 payment id: {payment_id}",
@@ -82,7 +62,7 @@ async def webhook(request):
         return web.Response(status=400, text="test mode mismatch")
 
     try:
-        event_amount = f"{float(event.get('amount', 0)):.2f}"
+        event_amount = f"{float(event.amount):.2f}"
         stored_amount = f"{float(payment['amount']):.2f}"
     except (TypeError, ValueError):
         return web.Response(status=400, text="invalid amount")
@@ -94,13 +74,13 @@ async def webhook(request):
         )
         return web.Response(status=400, text="amount mismatch")
 
-    if event.get("currency") != payment["currency"]:
+    if event.currency != payment["currency"]:
         return web.Response(status=400, text="currency mismatch")
 
     await notify_admin(
         request.app["bot"],
-        "📩 webhook rollypay\n\n"
-        f"событие: {event.get('event_type', '—')}\n"
+        "📩 платёжный webhook\n\n"
+        f"событие: {event.event_type}\n"
         f"статус: {status}\n"
         f"🆔 payment id: {payment_id}\n"
         f"🧪 тест: {'да' if payment['test'] else 'нет'}",
@@ -127,11 +107,13 @@ async def webhook(request):
             f"🆔 telegram id: {payment['tg_id']}\n"
             f"💳 payment id: {payment_id}",
         )
+        await update_payment_status(payment_id, "user_not_found")
         return web.Response(status=200, text="user not found")
 
     try:
         renewal = await renew_paid_subscription(user, payment)
         sub_id = renewal.sub_id
+        expires_at = renewal.expires_at
     except Exception:
         logging.exception("failed to renew after payment")
         await update_payment_status(payment_id, "renewal_failed")
@@ -238,8 +220,8 @@ async def create_app():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    if not ROLLYPAY_SIGNING_SECRET:
-        raise RuntimeError("ROLLYPAY_SIGNING_SECRET is not set")
+    if not PAYMENT_SIGNING_SECRET:
+        raise RuntimeError("PAYMENT_SIGNING_SECRET is not set")
 
     ssl_context = None
     if WEBHOOK_SSL_CERT_PATH and WEBHOOK_SSL_KEY_PATH:
