@@ -555,7 +555,7 @@ async def claim_payment_for_processing(payment_id):
             """
             UPDATE payments
             SET status = 'processing', updated_at = strftime('%s', 'now')
-            WHERE payment_id = ? AND status NOT IN ('paid', 'processing')
+            WHERE payment_id = ? AND status NOT IN ('paid', 'processing', 'renewal_review', 'renewal_failed')
             """,
             (payment_id,),
         )
