@@ -1,6 +1,6 @@
 # реестр привязок Kitty VPN — исходный снимок 9123a502c2b28ad9b1d1c58202510c3f7f79150c
 
-Исходный репозиторий: https://github.com/twfar/kitty  
+Исходный снимок взят из приватного репозитория Kitty VPN.  
 Зафиксированный commit: `9123a502c2b28ad9b1d1c58202510c3f7f79150c`  
 Ветка переноса: `universal-template`
 
@@ -13,7 +13,7 @@
 | Ссылки | `SUBSCRIPTION_BASE_URL`, `CHANNEL_URL`, `CHANNEL_USERNAME`, `ADMIN_URL`, `SUPPORT_URL`, `PRIVACY_URL`, `OFFER_URL` | подписки, канал, поддержка и документы |
 | 3x-ui | `XUI_HOST`, `XUI_API_TOKEN`, `XUI_INBOUND_IDS` | API панели и inbound для новых клиентов |
 | HWID | `TRIAL_HWID_LIMIT`, `PAID_HWID_LIMIT`, `MIN_PAID_DEVICES`, `MAX_PAID_DEVICES` | ограничения устройств |
-| Trial и срок | `TRIAL_DURATION_HOURS`, `TRIAL_HWID_LIMIT` | длительность trial, лимит устройств и очистка |
+| Trial | `TRIAL_DURATION_HOURS`, `TRIAL_HWID_LIMIT` | длительность пробного доступа и лимит устройств |
 | Тарифы и валюта | `BASE_MONTHLY_PRICE`, `EXTRA_DEVICE_MONTHLY_PRICE`, `THREE_MONTH_DISCOUNT_PERCENT`, `SUBSCRIPTION_MONTH_DAYS`, `CURRENCY_CODE`, `CURRENCY_SYMBOL` | расчет цены и срока |
 | Платежи | `PAYMENT_*` | API-адрес, ключи, подпись, callback, тестовый режим и описание платежа |
 | Медиа | `MAIN_MENU_PHOTO`, `TRIAL_MENU_PHOTO`, `MENU_PHOTOS`, `PREMIUM_EMOJI_ID` | собственные фото и emoji |
