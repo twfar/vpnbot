@@ -60,7 +60,7 @@ from db import (
     get_broadcast_users,
     get_user_by_username,
 )
-from payments import get_payment_provider
+from payments.factory import get_payment_provider
 
 from xui import (
     create_client,
