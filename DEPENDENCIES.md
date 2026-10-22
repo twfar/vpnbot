@@ -54,3 +54,13 @@
 - логи, виртуальные окружения, кэш и локальные IDE-файлы;
 - реальные file_id изображений и персональный тестовый Telegram ID;
 - абсолютные пути и TLS-сертификаты исходного сервера.
+
+## additional modularization (branch `universal-template`)
+
+- `services/subscriptions.py`: paid renewal orchestration, currently used by `webhook.py`; it deliberately delegates persistence and 3x-ui calls to the existing adapters.
+- `subscription_urls.py`: pure URL builder covered by unit tests. Regular and JSON links share `SUBSCRIPTION_BASE_URL` and use configurable paths.
+- `payments/base.py`: shared payment and webhook contracts.
+- `payments/rollypay.py`: current provider adapter for checkout creation, HMAC signature verification and event normalization.
+- `payments/factory.py`: provider selection. Only `rollypay` is implemented until the replacement provider is selected.
+- `db.py`: an atomic `claim_payment_for_processing` prevents concurrent duplicate paid webhooks from applying a second renewal. The database is still SQLite/aiosqlite; SQLAlchemy migration is not part of this stage.
+- `.env.test.example`: isolated configuration template. It contains placeholders and cannot be used until test credentials and a dedicated test 3x-ui panel are supplied.
