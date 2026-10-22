@@ -13,8 +13,8 @@
 | Ссылки | `SUBSCRIPTION_BASE_URL`, `CHANNEL_URL`, `CHANNEL_USERNAME`, `ADMIN_URL`, `SUPPORT_URL`, `PRIVACY_URL`, `OFFER_URL` | подписки, канал, поддержка и документы |
 | 3x-ui | `XUI_HOST`, `XUI_API_TOKEN`, `XUI_INBOUND_IDS` | API панели и inbound для новых клиентов |
 | HWID | `TRIAL_HWID_LIMIT`, `PAID_HWID_LIMIT`, `MIN_PAID_DEVICES`, `MAX_PAID_DEVICES` | ограничения устройств |
-| Trial и срок | `TRIAL_DURATION_HOURS`, `SUBSCRIPTION_DELETE_AFTER_DAYS` | параметры trial и очистки |
-| Тарифы и валюта | `BASE_MONTHLY_PRICE`, `EXTRA_DEVICE_MONTHLY_PRICE`, `CURRENCY_CODE`, `CURRENCY_SYMBOL` | расчет цены |
+| Trial и срок | `TRIAL_DURATION_HOURS`, `TRIAL_HWID_LIMIT`, `SUBSCRIPTION_DELETE_AFTER_DAYS` | длительность trial, лимит устройств и очистка |
+| Тарифы и валюта | `BASE_MONTHLY_PRICE`, `EXTRA_DEVICE_MONTHLY_PRICE`, `THREE_MONTH_DISCOUNT_PERCENT`, `SUBSCRIPTION_MONTH_DAYS`, `CURRENCY_CODE`, `CURRENCY_SYMBOL` | расчет цены и срока |
 | Платежи | `PAYMENT_*` | API-адрес, ключи, подпись, callback, тестовый режим и описание платежа |
 | Медиа | `MAIN_MENU_PHOTO`, `TRIAL_MENU_PHOTO`, `MENU_PHOTOS`, `PREMIUM_EMOJI_ID` | собственные фото и emoji |
 | База и webhook | `DATABASE_PATH`, `WEBHOOK_*` | локальная БД и запуск webhook |
