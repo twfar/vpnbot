@@ -11,6 +11,7 @@ from config import (BOT_TOKEN, ADMIN_ID, ROLLYPAY_SIGNING_SECRET, PAYMENT_WEBHOO
 from db import (
     get_payment,
     update_payment_status,
+    claim_payment_for_processing,
     get_user,
     get_referrer_id,
     update_user,
@@ -114,8 +115,8 @@ async def webhook(request):
                 logging.exception("failed to notify user about failed payment")
         return web.Response(status=200, text="ok")
 
-    if payment["status"] == "paid":
-        return web.Response(status=200, text="already processed")
+    if not await claim_payment_for_processing(payment_id):
+        return web.Response(status=200, text="already processed or processing")
 
     user = await get_user(payment["tg_id"])
 
