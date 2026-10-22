@@ -534,6 +534,23 @@ async def update_payment_status(payment_id, status):
         )
         await db.commit()
 
+async def update_payment_status_if_unclaimed(payment_id, status):
+    """Record non-paid provider states without overriding an active renewal."""
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        cursor = await db.execute(
+            """
+            UPDATE payments
+            SET status = ?, updated_at = strftime('%s', 'now')
+            WHERE payment_id = ?
+              AND status NOT IN (
+                  'paid', 'processing', 'renewal_review', 'renewal_failed'
+              )
+            """,
+            (status, payment_id),
+        )
+        await db.commit()
+        return cursor.rowcount == 1
+
 
 async def payment_paid_once(payment_id):
     async with aiosqlite.connect(DATABASE_PATH) as db:
